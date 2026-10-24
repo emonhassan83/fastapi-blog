@@ -10,12 +10,19 @@ packages.
 
 ```powershell
 uv sync --all-groups
+Copy-Item .env.example .env
 uv run uvicorn app.main:app --reload --reload-dir src
 ```
 
 `--reload-dir src` keeps Uvicorn's watcher focused on application code instead
 of the project root and virtual environment. The legacy `uvicorn main:app`
 import is also supported.
+
+Set both `APP_NAME` and `DATABASE_URL` in `.env` before starting the app; neither
+has a default value. Keep real database credentials out of `.env.example`.
+The server checks PostgreSQL connectivity during startup and logs a success
+message. If the connection check fails, it logs the error and aborts startup.
+The current post routes still use in-memory data.
 
 The existing post endpoints are available at `/posts` and `/posts/{id}`.
 The users and orders packages are structural placeholders; persistence,

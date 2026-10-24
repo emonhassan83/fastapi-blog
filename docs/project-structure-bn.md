@@ -79,7 +79,7 @@ fastapi_blog/
 | `pyproject.toml` | প্রজেক্টের নাম ও Python সংস্করণ, runtime/dev dependency, `uv_build`, pytest এবং Ruff কনফিগার করে। |
 | `uv.lock` | `uv`-এর নির্দিষ্ট dependency version ও resolution lock করে, যাতে একই dependency set পুনরায় ইনস্টল করা যায়। |
 | `.python-version` | `uv` ও developer tooling-কে প্রজেক্টের Python সংস্করণ জানায়। |
-| `.env.example` | স্থানীয় environment variable-এর নমুনা; বর্তমানে `APP_NAME` দেখানো আছে। |
+| `.env.example` | প্রয়োজনীয় environment variable-এর নমুনা; এখানে আসল database credential রাখা যাবে না। |
 | `.gitignore` | virtual environment, Python bytecode ও build artifact Git থেকে বাদ দেয়। |
 | `README.md` | দ্রুত শুরু, server চালানো এবং check/test চালানোর সংক্ষিপ্ত নির্দেশনা। |
 | `main.py` | `uvicorn main:app` ব্যবহারকারীদের জন্য পুরোনো import path-এ compatibility entry point; আসল app এখানে তৈরি হয় না। |
@@ -115,8 +115,8 @@ fastapi_blog/
 | ফাইল | কাজ |
 | --- | --- |
 | `core/__init__.py` | `core` package চিহ্নিত করে। |
-| `core/config.py` | `pydantic-settings`-এর `Settings` class দিয়ে `APP_NAME` configuration পড়ে; `.env` file থাকলে তা ব্যবহার করে। |
-| `core/database.py` | database integration-এর placeholder। SQLAlchemy বা Motor engine/session এখনো সেটআপ করা হয়নি। |
+| `core/config.py` | `pydantic-settings`-এর `Settings` class দিয়ে `.env` থেকে প্রয়োজনীয় `APP_NAME` ও `DATABASE_URL` পড়ে; কোনো default নেই, তাই configuration অনুপস্থিত হলে app startup স্পষ্ট validation error-এ থামে। |
+| `core/database.py` | SQLAlchemy declarative `Base`, PostgreSQL engine, `SessionLocal` এবং request-scoped `get_db()` session dependency সংজ্ঞা দেয়। |
 | `core/security.py` | authentication/password hashing logic রাখার placeholder; এখনো implement করা হয়নি। |
 | `core/exceptions.py` | application-specific exception রাখার placeholder। |
 
@@ -161,7 +161,8 @@ layout। বর্তমান `post` এবং `users` ফোল্ডার�
 | `alembic/versions/` | ভবিষ্যতের migration revision রাখার directory। |
 | `alembic/versions/__init__.py` | versions directory-কে Python package হিসেবে চিহ্নিত করে; migration revision নয়। |
 
-Database নির্বাচন ও setup না হওয়ায় Alembic এখনো কার্যকর migration চালায় না।
+Alembic environment এখনো placeholder; metadata ও migration command configure করা
+হয়নি।
 
 ## `tests/` — পরীক্ষা
 
@@ -179,8 +180,28 @@ Ruff check এবং pytest চালানো হয়।
 
 ## বর্তমানে চালু post API
 
-ডেটা এখন process memory-তে রাখা হয়; database-এ persist হয় না। Server restart হলে
-তৈরি/পরিবর্তিত post হারিয়ে যাবে।
+PostgreSQL connection ও SQLAlchemy session প্রস্তুত আছে, কিন্তু বর্তমান post
+endpoint-গুলো এখনো process memory-তে data রাখে; database-এ persist হয় না। Server
+restart হলে তৈরি/পরিবর্তিত post হারিয়ে যাবে।
+
+## PostgreSQL সংযোগ কনফিগার
+
+1. PostgreSQL চালু করে `fastapi_blog` নামে database তৈরি করুন।
+2. `.env.example`-কে `.env` নামে কপি করুন।
+3. `.env`-এর `DATABASE_URL`-এ আপনার database user/password/host/port/database দিন এবং `APP_NAME` সেট করুন।
+   Format: `postgresql+psycopg2://USER:PASSWORD@HOST:PORT/DATABASE`
+4. Dependency sync করুন এবং app চালান:
+
+```powershell
+uv sync --all-groups
+uv run uvicorn app.main:app --reload --reload-dir src
+```
+
+Server startup-এ `SELECT 1` চালিয়ে connection check করে এবং সফল হলে log-এ
+success message দেয়। Connection ব্যর্থ হলে error log করে startup বন্ধ করে দেয়
+(fail-fast); database ছাড়া server চালু থাকে না। `get_db` dependency ব্যবহার
+করতে route-এ `db: Session = Depends(get_db)` inject করুন। বর্তমান CRUD route-গুলো
+database ব্যবহার করছে না; এটি connection/session foundation মাত্র।
 
 | Method | Path | কাজ |
 | --- | --- | --- |
