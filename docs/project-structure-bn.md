@@ -84,7 +84,7 @@ fastapi_blog/
 | `README.md` | দ্রুত শুরু, server চালানো এবং check/test চালানোর সংক্ষিপ্ত নির্দেশনা। |
 | `main.py` | `uvicorn main:app` ব্যবহারকারীদের জন্য পুরোনো import path-এ compatibility entry point; আসল app এখানে তৈরি হয় না। |
 | `Dockerfile` | Python image-এ dependency sync করে Uvicorn দিয়ে app চালানোর container recipe। |
-| `alembic.ini` | Alembic migration script directory-এর অবস্থান নির্ধারণ করে। |
+| `alembic.ini` | Alembic migration config ও script directory নির্ধারণ করে। |
 
 ## `src/app/` — অ্যাপ্লিকেশনের মূল কোড
 
@@ -161,12 +161,13 @@ layout। `post` module বাস্তবায়িত; `users` module-এর �
 
 | ফাইল/ফোল্ডার | কাজ |
 | --- | --- |
-| `alembic/env.py` | migration environment-এর placeholder; metadata ও database connection configure করা হয়নি। |
-| `alembic/versions/` | ভবিষ্যতের migration revision রাখার directory। |
+| `alembic/env.py` | `.env`-এর `DATABASE_URL` ও SQLAlchemy metadata ব্যবহার করে migration চালায়। |
+| `alembic/versions/` | versioned database migration revision রাখে। |
+| `alembic/versions/20261024_1500_add_post_timestamps.py` | পুরোনো `posts` table-এ timestamp column যোগ করে। |
 | `alembic/versions/__init__.py` | versions directory-কে Python package হিসেবে চিহ্নিত করে; migration revision নয়। |
 
-Alembic environment এখনো placeholder; metadata ও migration command configure করা
-হয়নি।
+Use `uv run alembic upgrade head` to apply pending database migrations.
+
 
 ## `tests/` — পরীক্ষা
 

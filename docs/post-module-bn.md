@@ -201,13 +201,14 @@ API request/response দেখতে server চালু করে `/docs` খ�
   response দেখতে database-এ record থাকতে হবে।
 - Model-এর field পরিবর্তন করলে `create_all()` পুরোনো table-এর column update করে
   না; schema পরিবর্তনে migration প্রয়োজন। `created_at`/`updated_at` যোগ করার
-  আগে তৈরি database-এ নিচের SQL একবার চালান:
+  আগে তৈরি database-এ নিচের Alembic migration চালান:
 
-```sql
-ALTER TABLE posts
-    ADD COLUMN created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    ADD COLUMN updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP;
+```powershell
+uv run alembic upgrade head
 ```
 
-এই SQL-এ পুরোনো row-গুলোও বর্তমান সময় দিয়ে পূরণ হবে। নতুন post-এর timestamp
-application থেকে UTC-তে তৈরি হয়।
+Migration পুরোনো row-গুলোতেও `CURRENT_TIMESTAMP` বসিয়ে দুইটি column যোগ করবে।
+প্রথমবার নতুন database তৈরি করলে আগে app একবার চালান, যাতে `posts` table তৈরি
+হয়; তারপর app থামিয়ে migration command চালান। Migration শেষ হলে app আবার চালান।
+Migration rollback করতে `uv run alembic downgrade base` ব্যবহার করা যায়—এতে
+timestamp column ও সেগুলোর data মুছে যাবে।

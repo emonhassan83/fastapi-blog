@@ -20,6 +20,8 @@ import is also supported.
 
 Set both `APP_NAME` and `DATABASE_URL` in `.env` before starting the app; neither
 has a default value. Keep real database credentials out of `.env.example`.
+After adding a database schema change, apply it with `uv run alembic upgrade head`
+before using the updated API.
 The server checks PostgreSQL connectivity during startup and logs a success
 message. If the connection check fails, it logs the error and aborts startup.
 Post APIs use PostgreSQL and are available under `/api/v1/posts`.
