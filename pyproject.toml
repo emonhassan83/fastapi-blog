@@ -1,0 +1,38 @@
+[project]
+name = "fastapi-blog"
+version = "0.1.0"
+description = "A modular FastAPI blog application"
+readme = "README.md"
+authors = [
+    { name = "emonhassan83", email = "emonhasan7650@gmail.com" }
+]
+requires-python = ">=3.14"
+dependencies = [
+    "fastapi[standard]>=0.162.0",
+    "pydantic>=2.14.1",
+    "pydantic-settings>=2.13.1",
+]
+
+[project.scripts]
+fastapi-blog = "app.main:main"
+
+[dependency-groups]
+dev = [
+    "httpx>=0.28.1",
+    "pytest>=8.3.0",
+    "ruff>=0.11.0",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+src = ["src"]
+
+[build-system]
+requires = ["uv_build>=0.13.5,<0.14.0"]
+build-backend = "uv_build"
+
+[tool.uv.build-backend]
+module-name = "app"
