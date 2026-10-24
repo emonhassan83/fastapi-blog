@@ -104,11 +104,11 @@ fastapi_blog/
 | ফাইল | কাজ |
 | --- | --- |
 | `api/__init__.py` | API package চিহ্নিত করে। |
-| `api/v1.py` | বর্তমানে চালু root ও post endpoint, request schema, in-memory post data এবং CRUD handler রাখে। |
-| `api/deps.py` | ভবিষ্যতে shared FastAPI dependency রাখার জন্য; এখনো dependency সংজ্ঞায়িত নেই। |
+| `api/v1.py` | `/api/v1`-এর module router aggregate করে। |
+| `api/deps.py` | shared FastAPI dependency রাখার জায়গা; database session-এর `get_db` dependency `core/database.py` থেকে import করা যায়। |
 
-বর্তমান post endpoint-গুলো সরাসরি `api/v1.py`-তে আছে। `modules/post/router.py`
-এখনো এই endpoint-গুলোর router নয় এবং `main.py`-তে include করা হয়নি।
+`main.py`-তে `api/v1.py` router-টি `/api/v1` prefix-এ include করা হয়। Versioned
+API-র প্রতিটি domain router `api/v1.py` aggregator-এ যুক্ত করতে হবে।
 
 ### `src/app/core/` — cross-cutting configuration ও infrastructure
 
@@ -123,8 +123,7 @@ fastapi_blog/
 ### `src/app/modules/` — domain/module-ভিত্তিক কোড
 
 প্রতিটি domain-এর router, schema, model, service ও repository আলাদা রাখার জন্য এই
-layout। বর্তমান `post` এবং `users` ফোল্ডারের ফাইলগুলো placeholder—এগুলোতে এখনো
-বাস্তব domain logic নেই।
+layout। `post` module বাস্তবায়িত; `users` module-এর ফাইলগুলো placeholder।
 
 | ফাইলের ধরন | সাধারণ দায়িত্ব |
 | --- | --- |
@@ -136,9 +135,14 @@ layout। বর্তমান `post` এবং `users` ফোল্ডার�
 
 #### `src/app/modules/post/`
 
-`__init__.py`, `router.py`, `schemas.py`, `models.py`, `service.py` এবং
-`repository.py`-এর scaffold আছে। এগুলো বর্তমানে placeholder; চালু post API-র
-বাস্তবায়ন `src/app/api/v1.py`-তে।
+`models.py`-এ `posts` table-এর SQLAlchemy `PostRecord` model (এর মধ্যে
+`created_at` ও `updated_at` timestamp-ও আছে); `schemas.py`-এ request/response schema;
+`repository.py`-তে database query ও transaction;
+`service.py`-তে business operation; এবং `router.py`-তে HTTP route আছে। Post-এর
+সব CRUD behavior এই module-এ রাখা হয়েছে।
+
+এই পাঁচটি ফাইলের দায়িত্ব ও request flow-এর বিস্তারিত জানতে
+[Post module documentation](./post-module-bn.md) দেখুন।
 
 #### `src/app/modules/users/`
 
@@ -169,7 +173,7 @@ Alembic environment এখনো placeholder; metadata ও migration command con
 | ফাইল/ফোল্ডার | কাজ |
 | --- | --- |
 | `tests/conftest.py` | pytest fixture হিসেবে FastAPI `TestClient` তৈরি করে। |
-| `tests/unit/test_api.py` | root response এবং seed post list-এর জন্য unit/API test। |
+| `tests/unit/test_api.py` | root এবং versioned post CRUD API-র unit test। |
 | `tests/unit/` | unit test রাখে। |
 | `tests/integration/` | ভবিষ্যতের integration test-এর directory; বর্তমানে test নেই। |
 
@@ -180,9 +184,20 @@ Ruff check এবং pytest চালানো হয়।
 
 ## বর্তমানে চালু post API
 
-PostgreSQL connection ও SQLAlchemy session প্রস্তুত আছে, কিন্তু বর্তমান post
-endpoint-গুলো এখনো process memory-তে data রাখে; database-এ persist হয় না। Server
-restart হলে তৈরি/পরিবর্তিত post হারিয়ে যাবে।
+Post-এর সব CRUD endpoint PostgreSQL-এর `posts` table ব্যবহার করে। Route module,
+schema, service, repository এবং SQLAlchemy model—সব post-সংক্রান্ত code
+`src/app/modules/post/`-এ রাখা হয়েছে। `src/app/api/v1.py` শুধু module router
+aggregate করে; `main.py` API router-টি `/api/v1` prefix-এ mount করে।
+
+| Method | Path | কাজ |
+| --- | --- | --- |
+| `POST` | `/api/v1/posts` | নতুন post তৈরি করে। |
+| `GET` | `/api/v1/posts` | সব post ফেরত দেয়। |
+| `GET` | `/api/v1/posts/{post_id}` | ID দিয়ে একটি post ফেরত দেয়। |
+| `PUT` | `/api/v1/posts/{post_id}` | ID দিয়ে post update করে। |
+| `DELETE` | `/api/v1/posts/{post_id}` | ID দিয়ে post মুছে দেয়। |
+
+Root welcome endpoint `GET /`-এ আছে এবং OpenAPI schema-তে দেখানো হয় না।
 
 ## PostgreSQL সংযোগ কনফিগার
 
@@ -198,19 +213,10 @@ uv run uvicorn app.main:app --reload --reload-dir src
 ```
 
 Server startup-এ `SELECT 1` চালিয়ে connection check করে এবং সফল হলে log-এ
-success message দেয়। Connection ব্যর্থ হলে error log করে startup বন্ধ করে দেয়
-(fail-fast); database ছাড়া server চালু থাকে না। `get_db` dependency ব্যবহার
-করতে route-এ `db: Session = Depends(get_db)` inject করুন। বর্তমান CRUD route-গুলো
-database ব্যবহার করছে না; এটি connection/session foundation মাত্র।
-
-| Method | Path | কাজ |
-| --- | --- | --- |
-| `GET` | `/` | স্বাগত বার্তা দেয়; OpenAPI schema-তে দেখানো হয় না। |
-| `POST` | `/posts` | নতুন post তৈরি করে। |
-| `GET` | `/posts` | সব post ফেরত দেয়। |
-| `GET` | `/posts/{id}` | ID দিয়ে একটি post ফেরত দেয়। |
-| `PUT` | `/posts/{id}` | ID দিয়ে post update করে। |
-| `DELETE` | `/posts/{id}` | ID দিয়ে post মুছে দেয়। |
+success message দেয়। `posts` table না থাকলে SQLAlchemy model থেকে table তৈরি হয়।
+Connection ব্যর্থ হলে error log করে startup বন্ধ করে দেয় (fail-fast); database
+ছাড়া server চালু থাকে না। Post route-এ `get_db` dependency দিয়ে database session
+নিয়ে service/repository layer-এ query করা হয়।
 
 ## Local development
 

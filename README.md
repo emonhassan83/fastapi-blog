@@ -22,11 +22,10 @@ Set both `APP_NAME` and `DATABASE_URL` in `.env` before starting the app; neithe
 has a default value. Keep real database credentials out of `.env.example`.
 The server checks PostgreSQL connectivity during startup and logs a success
 message. If the connection check fails, it logs the error and aborts startup.
-The current post routes still use in-memory data.
+Post APIs use PostgreSQL and are available under `/api/v1/posts`.
 
-The existing post endpoints are available at `/posts` and `/posts/{id}`.
-The users and orders packages are structural placeholders; persistence,
-migrations, and authentication have not been configured yet.
+The users module is still a structural placeholder. Alembic migrations and
+authentication have not been configured yet.
 
 ## Checks
 
