@@ -39,7 +39,7 @@ fastapi_blog/
 │       │   │   ├── router.py
 │       │   │   ├── schemas.py
 │       │   │   └── service.py
-│       │   └── users/
+│       │   └── user/
 │       │       ├── __init__.py
 │       │       ├── models.py
 │       │       ├── repository.py
@@ -48,7 +48,7 @@ fastapi_blog/
 │       │       └── service.py
 │       └── shared/
 │           ├── __init__.py
-│           ├── base_models.py
+│           ├── base_schemas.py
 │           └── pagination.py
 ├── tests/
 │   ├── conftest.py
@@ -105,7 +105,7 @@ fastapi_blog/
 | --- | --- |
 | `api/__init__.py` | API package চিহ্নিত করে। |
 | `api/v1.py` | `/api/v1`-এর module router aggregate করে। |
-| `api/deps.py` | shared FastAPI dependency রাখার জায়গা; database session-এর `get_db` dependency `core/database.py` থেকে import করা যায়। |
+| `api/deps.py` | shared FastAPI dependency রাখার জায়গা; `DatabaseSession` (Annotated DB session) এবং `get_db` এখান থেকে export করা হয়। |
 
 `main.py`-তে `api/v1.py` router-টি `/api/v1` prefix-এ include করা হয়। Versioned
 API-র প্রতিটি domain router `api/v1.py` aggregator-এ যুক্ত করতে হবে।
@@ -123,7 +123,7 @@ API-র প্রতিটি domain router `api/v1.py` aggregator-এ যুক
 ### `src/app/modules/` — domain/module-ভিত্তিক কোড
 
 প্রতিটি domain-এর router, schema, model, service ও repository আলাদা রাখার জন্য এই
-layout। `post` module বাস্তবায়িত; `users` module-এর ফাইলগুলো placeholder।
+layout। `post` module বাস্তবায়িত; `user` module-এর ফাইলগুলো placeholder।
 
 | ফাইলের ধরন | সাধারণ দায়িত্ব |
 | --- | --- |
@@ -144,17 +144,17 @@ layout। `post` module বাস্তবায়িত; `users` module-এর �
 এই পাঁচটি ফাইলের দায়িত্ব ও request flow-এর বিস্তারিত জানতে
 [Post module documentation](./post-module-bn.md) দেখুন।
 
-#### `src/app/modules/users/`
+#### `src/app/modules/user/`
 
 `__init__.py`, `router.py`, `schemas.py`, `models.py`, `service.py` এবং
-`repository.py`-এর scaffold আছে। Users API, model ও business logic এখনো তৈরি হয়নি।
+`repository.py`-এর scaffold আছে। User API, model ও business logic এখনো তৈরি হয়নি।
 
 ### `src/app/shared/` — পুনর্ব্যবহারযোগ্য উপাদান
 
 | ফাইল | কাজ |
 | --- | --- |
 | `shared/__init__.py` | shared package চিহ্নিত করে। |
-| `shared/base_models.py` | একাধিক domain-এ ব্যবহারযোগ্য base Pydantic model রাখার placeholder। |
+| `shared/base_schemas.py` | একাধিক domain-এ ব্যবহারযোগ্য base Pydantic schema রাখার placeholder। |
 | `shared/pagination.py` | pagination helper রাখার placeholder। |
 
 ## `alembic/` — database migration scaffold

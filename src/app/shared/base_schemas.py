@@ -1,1 +1,1 @@
-"""Shared Pydantic model definitions placeholder."""
+"""Shared Pydantic schema definitions placeholder."""

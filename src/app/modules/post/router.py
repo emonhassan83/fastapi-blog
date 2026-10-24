@@ -1,15 +1,10 @@
-from typing import Annotated
+from fastapi import APIRouter, HTTPException, Response, status
 
-from fastapi import APIRouter, Depends, HTTPException, Response, status
-from sqlalchemy.orm import Session
-
-from app.core.database import get_db
+from app.api.deps import DatabaseSession
 from app.modules.post.schemas import PostCreate, PostRead, PostUpdate
 from app.modules.post.service import PostService
 
 router = APIRouter()
-DatabaseSession = Annotated[Session, Depends(get_db)]
-
 
 @router.post("", status_code=status.HTTP_201_CREATED)
 def create_post(post_data: PostCreate, db: DatabaseSession) -> dict:
