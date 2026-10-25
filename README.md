@@ -29,8 +29,19 @@ Post APIs use PostgreSQL and are available under `/api/v1/posts`.
 User registration API is available under `/api/v1/users/register` with secure password
 hashing via pwdlib (Argon2 / bcrypt).
 
+## Scaffold New Module
+
+নতুন ডোমেন মডিউল (`models`, `schemas`, `repository`, `service`, `router`) এক ক্লিকে তৈরি করতে:
+
+```powershell
+uv run python scripts/create_module.py <module_name>
+# উদাহরণ:
+uv run python scripts/create_module.py category
+uv run python scripts/create_module.py tag
+```
 
 ## Checks
+
 
 ```powershell
 uv run ruff check .
