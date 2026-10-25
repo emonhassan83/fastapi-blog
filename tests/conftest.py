@@ -21,8 +21,15 @@ def db_session() -> MagicMock:
         updated_at=datetime(2026, 10, 24, tzinfo=UTC),
     )
     session.scalars.return_value.all.return_value = [post]
-    session.scalar.return_value = 1
     session.get.return_value = post
+
+    def mock_scalar(statement=None, *args, **kwargs):
+        if statement is not None and "count" in str(statement).lower():
+            return 1
+        return None
+
+    session.scalar.side_effect = mock_scalar
+
 
     def refresh_record(record):
         record.id = 1

@@ -4,6 +4,7 @@ from sqlalchemy import create_engine
 from app.core.config import settings
 from app.core.database import Base
 from app.modules.post import models as post_models  # noqa: F401
+from app.modules.user import models as user_models  # noqa: F401
 
 config = context.config
 

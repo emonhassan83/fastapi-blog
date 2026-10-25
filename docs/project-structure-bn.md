@@ -117,13 +117,13 @@ API-র প্রতিটি domain router `api/v1.py` aggregator-এ যুক
 | `core/__init__.py` | `core` package চিহ্নিত করে। |
 | `core/config.py` | `pydantic-settings`-এর `Settings` class দিয়ে `.env` থেকে প্রয়োজনীয় `APP_NAME` ও `DATABASE_URL` পড়ে; কোনো default নেই, তাই configuration অনুপস্থিত হলে app startup স্পষ্ট validation error-এ থামে। |
 | `core/database.py` | SQLAlchemy declarative `Base`, PostgreSQL engine, `SessionLocal` এবং request-scoped `get_db()` session dependency সংজ্ঞা দেয়। |
-| `core/security.py` | authentication/password hashing logic রাখার placeholder; এখনো implement করা হয়নি। |
+| `core/security.py` | `pwdlib` (Argon2 / bcrypt) দিয়ে password hashing ও verification helper। |
 | `core/exceptions.py` | application-specific exception রাখার placeholder। |
 
 ### `src/app/modules/` — domain/module-ভিত্তিক কোড
 
 প্রতিটি domain-এর router, schema, model, service ও repository আলাদা রাখার জন্য এই
-layout। `post` module বাস্তবায়িত; `user` module-এর ফাইলগুলো placeholder।
+layout। `post` এবং `user` module বাস্তবায়িত।
 
 | ফাইলের ধরন | সাধারণ দায়িত্ব |
 | --- | --- |
@@ -146,8 +146,11 @@ layout। `post` module বাস্তবায়িত; `user` module-এর ফ
 
 #### `src/app/modules/user/`
 
-`__init__.py`, `router.py`, `schemas.py`, `models.py`, `service.py` এবং
-`repository.py`-এর scaffold আছে। User API, model ও business logic এখনো তৈরি হয়নি।
+`models.py`-এ `users` table-এর SQLAlchemy `User` model; `schemas.py`-এ `UserRegister` ও
+`UserResponse` validation schema; `repository.py`-তে database access; `service.py`-তে
+duplicate email/username check ও password hashing; এবং `router.py`-তে `/api/v1/users/register`
+registration endpoint রয়েছে।
+
 
 ### `src/app/shared/` — পুনর্ব্যবহারযোগ্য উপাদান
 
