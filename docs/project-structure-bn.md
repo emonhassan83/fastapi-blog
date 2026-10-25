@@ -32,6 +32,11 @@ fastapi_blog/
 │       │   └── security.py
 │       ├── modules/
 │       │   ├── __init__.py
+│       │   ├── auth/
+│       │   │   ├── __init__.py
+│       │   │   ├── router.py
+│       │   │   ├── schemas.py
+│       │   │   └── service.py
 │       │   ├── post/
 │       │   │   ├── __init__.py
 │       │   │   ├── models.py
@@ -48,6 +53,7 @@ fastapi_blog/
 │       │       └── service.py
 │       └── shared/
 │           ├── __init__.py
+
 │           ├── base_schemas.py
 │           └── pagination.py
 ├── tests/
@@ -150,6 +156,16 @@ layout। `post` এবং `user` module বাস্তবায়িত।
 `UserResponse` validation schema; `repository.py`-তে database access; `service.py`-তে
 duplicate email/username check ও password hashing; এবং `router.py`-তে `/api/v1/users/register`
 registration endpoint রয়েছে।
+
+#### `src/app/modules/auth/`
+
+`schemas.py`-এ `LoginRequest` ও `TokenResponse` schema; `service.py`-তে email/password
+verification ও JWT token generation; এবং `router.py`-তে `POST /api/v1/auth/login` ও
+`GET /api/v1/auth/me` (protected route) রয়েছে।
+
+JWT আর্কিটেকচার, token payload ও প্রোটেক্টেড রাউট ব্যবহারের বিস্তারিত জানতে
+[Authentication System documentation](./auth-system-bn.md) দেখুন।
+
 
 
 ### `src/app/shared/` — পুনর্ব্যবহারযোগ্য উপাদান

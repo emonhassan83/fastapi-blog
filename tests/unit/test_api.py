@@ -10,10 +10,13 @@ def test_api_routes_are_versioned(client):
 
     assert response.status_code == 200
     assert set(response.json()["paths"]) == {
+        "/api/v1/auth/login",
+        "/api/v1/auth/me",
         "/api/v1/posts",
         "/api/v1/posts/{post_id}",
         "/api/v1/users/register",
     }
+
 
 
 
@@ -210,4 +213,143 @@ def test_user_registration_invalid_input_validation(client):
         },
     )
     assert response.status_code == 422
+
+
+def test_login_successful_returns_jwt_token(client, db_session):
+    from unittest.mock import MagicMock
+
+    from app.core.security import decode_access_token, hash_password
+
+    user = MagicMock(
+        id=1,
+        username="testuser",
+        email="john@example.com",
+        password=hash_password("supersecretpassword"),
+    )
+    db_session.scalar.side_effect = None
+    db_session.scalar.return_value = user
+
+    response = client.post(
+        "/api/v1/auth/login",
+        json={
+            "email": "john@example.com",
+            "password": "supersecretpassword",
+        },
+    )
+
+    assert response.status_code == 200
+    data = response.json()
+    assert "access_token" in data
+    assert data["token_type"] == "bearer"
+    assert data["expires_in"] == 3600
+
+    payload = decode_access_token(data["access_token"])
+    assert payload["sub"] == "1"
+    assert payload["user_id"] == 1
+    assert payload["email"] == "john@example.com"
+
+
+def test_login_invalid_password_fails(client, db_session):
+    from unittest.mock import MagicMock
+
+    from app.core.security import hash_password
+
+    user = MagicMock(
+        id=1,
+        username="testuser",
+        email="john@example.com",
+        password=hash_password("supersecretpassword"),
+    )
+    db_session.scalar.side_effect = None
+    db_session.scalar.return_value = user
+
+    response = client.post(
+        "/api/v1/auth/login",
+        json={
+            "email": "john@example.com",
+            "password": "wrongpassword",
+        },
+    )
+
+    assert response.status_code == 401
+    assert response.json()["detail"] == "Incorrect email or password"
+
+
+def test_login_user_not_found_fails(client, db_session):
+    db_session.scalar.side_effect = None
+    db_session.scalar.return_value = None
+
+    response = client.post(
+        "/api/v1/auth/login",
+        json={
+            "email": "nonexistent@example.com",
+            "password": "supersecretpassword",
+        },
+    )
+
+    assert response.status_code == 401
+    assert response.json()["detail"] == "Incorrect email or password"
+
+
+def test_get_current_user_profile_success(client, db_session):
+    from unittest.mock import MagicMock
+
+    from app.core.security import create_access_token
+
+    user = MagicMock(
+        id=1,
+        username="testuser",
+        email="test@example.com",
+    )
+    db_session.get.return_value = user
+
+    token = create_access_token(user_id=1, email="test@example.com")
+    response = client.get(
+        "/api/v1/auth/me",
+        headers={"Authorization": f"Bearer {token}"},
+    )
+
+    assert response.status_code == 200
+    data = response.json()
+    assert data["message"] == "Current user profile retrieved successfully"
+    assert data["data"]["id"] == 1
+    assert data["data"]["email"] == "test@example.com"
+    assert data["data"]["username"] == "testuser"
+
+
+
+def test_get_current_user_profile_expired_token_fails(client):
+    from datetime import timedelta
+
+    from app.core.security import create_access_token
+
+    expired_token = create_access_token(
+        user_id=1,
+        email="test@example.com",
+        expires_delta=timedelta(seconds=-10),
+    )
+    response = client.get(
+        "/api/v1/auth/me",
+        headers={"Authorization": f"Bearer {expired_token}"},
+    )
+
+    assert response.status_code == 401
+    assert response.json()["detail"] == "Token has expired"
+
+
+def test_get_current_user_profile_invalid_token_fails(client):
+    response = client.get(
+        "/api/v1/auth/me",
+        headers={"Authorization": "Bearer invalid.jwt.token"},
+    )
+
+    assert response.status_code == 401
+    assert response.json()["detail"] == "Could not validate credentials"
+
+
+def test_get_current_user_profile_missing_token_fails(client):
+    response = client.get("/api/v1/auth/me")
+
+    assert response.status_code == 401
+
 

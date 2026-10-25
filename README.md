@@ -4,7 +4,9 @@ A small FastAPI application organized with a `src` layout and modular API
 packages.
 
 বাংলায় folder structure এবং প্রতিটি ফাইলের দায়িত্ব জানতে
-[প্রজেক্ট কাঠামোর বিস্তারিত](docs/project-structure-bn.md) দেখুন।
+[প্রজেক্ট কাঠামোর বিস্তারিত](docs/project-structure-bn.md) এবং
+JWT Authentication-এর বিস্তারিত জানতে [অথেনটিকেশন সিস্টেমের বিস্তারিত](docs/auth-system-bn.md) দেখুন।
+
 
 ## Run locally
 
@@ -26,8 +28,11 @@ The server checks PostgreSQL connectivity during startup and logs a success
 message. If the connection check fails, it logs the error and aborts startup.
 Post APIs use PostgreSQL and are available under `/api/v1/posts`.
 
-User registration API is available under `/api/v1/users/register` with secure password
-hashing via pwdlib (Argon2 / bcrypt).
+User registration API is available under `/api/v1/users/register`.
+User login and profile APIs are available under `/api/v1/auth/login` and `/api/v1/auth/me`
+with JWT authentication (PyJWT, configurable via `JWT_SECRET_KEY`, `JWT_ALGORITHM`,
+and `JWT_ACCESS_TOKEN_EXPIRE_MINUTES`).
+
 
 ## Scaffold New Module
 

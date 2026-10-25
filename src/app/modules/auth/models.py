@@ -1,9 +1,3 @@
-from sqlalchemy.orm import Mapped, mapped_column
+"""Auth domain models placeholder (Authentication uses the User entity)."""
 
-from app.core.database import Base
-
-
-class Auth(Base):
-    __tablename__ = "auths"
-
-    id: Mapped[int] = mapped_column(primary_key=True, index=True)
+__all__: list[str] = []
