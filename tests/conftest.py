@@ -21,6 +21,7 @@ def db_session() -> MagicMock:
         updated_at=datetime(2026, 10, 24, tzinfo=UTC),
     )
     session.scalars.return_value.all.return_value = [post]
+    session.scalar.return_value = 1
     session.get.return_value = post
 
     def refresh_record(record):

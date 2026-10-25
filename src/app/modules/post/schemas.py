@@ -2,6 +2,8 @@ from datetime import datetime
 
 from pydantic import BaseModel, ConfigDict
 
+from app.shared.pagination import PaginationMeta
+
 
 class PostCreate(BaseModel):
     title: str
@@ -27,3 +29,16 @@ class PostRead(BaseModel):
     updated_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class PostResponse(BaseModel):
+    message: str
+    data: PostRead
+
+
+class PostListResponse(BaseModel):
+
+    message: str
+    data: list[PostRead]
+    pagination: PaginationMeta
+

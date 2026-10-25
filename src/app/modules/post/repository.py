@@ -1,4 +1,4 @@
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app.modules.post.models import PostRecord
@@ -17,7 +17,25 @@ class PostRepository:
         return post
 
     def get_all(self) -> list[PostRecord]:
-        return list(self.session.scalars(select(PostRecord)).all())
+        return list(self.session.scalars(select(PostRecord).order_by(PostRecord.id.desc())).all())
+
+    def get_paginated(self, page: int = 1, limit: int = 10) -> tuple[list[PostRecord], int]:
+        offset = (page - 1) * limit
+        total_val = self.session.scalar(select(func.count()).select_from(PostRecord))
+        try:
+            total = int(total_val) if total_val is not None else 0
+        except (TypeError, ValueError):
+            total = 0
+
+        posts = list(
+            self.session.scalars(
+                select(PostRecord)
+                .order_by(PostRecord.id.desc())
+                .offset(offset)
+                .limit(limit)
+            ).all()
+        )
+        return posts, total
 
     def get_by_id(self, post_id: int) -> PostRecord | None:
         return self.session.get(PostRecord, post_id)

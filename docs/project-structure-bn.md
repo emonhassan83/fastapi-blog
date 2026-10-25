@@ -155,7 +155,7 @@ layout। `post` module বাস্তবায়িত; `user` module-এর ফ
 | --- | --- |
 | `shared/__init__.py` | shared package চিহ্নিত করে। |
 | `shared/base_schemas.py` | একাধিক domain-এ ব্যবহারযোগ্য base Pydantic schema রাখার placeholder। |
-| `shared/pagination.py` | pagination helper রাখার placeholder। |
+| `shared/pagination.py` | pagination helper (`PaginationParams`, `PaginationMeta`, `PaginatedResponse`)। |
 
 ## `alembic/` — database migration scaffold
 

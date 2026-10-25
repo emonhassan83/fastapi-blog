@@ -56,6 +56,9 @@ Pydantic schema HTTP request-এর data যাচাই করে এবং res
 - `PostRead`: API response-এর জন্য। এতে database-উৎপন্ন `id`-সহ post field থাকে।
   `created_at` ও `updated_at`-ও response-এ থাকে। `ConfigDict(from_attributes=True)`
   থাকার কারণে SQLAlchemy model object থেকে schema তৈরি করা যায়।
+- `PostResponse`: একক post response-এর wrapper schema (`message` ও `data: PostRead`)।
+- `PostListResponse`: একাধিক post list response-এর wrapper schema (`message`, `data: list[PostRead]` এবং `pagination: PaginationMeta`)।
+
 
 ### `repository.py` — database access
 

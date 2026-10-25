@@ -30,6 +30,32 @@ def test_get_posts_returns_database_posts(client):
             "updated_at": "2026-10-24T00:00:00Z",
         }
     ]
+    assert response.json()["pagination"] == {
+        "total": 1,
+        "page": 1,
+        "limit": 10,
+        "total_pages": 1,
+    }
+
+
+def test_get_posts_supports_pagination_query_parameters(client):
+    response = client.get("/api/v1/posts?page=2&limit=5")
+
+    assert response.status_code == 200
+    assert response.json()["pagination"] == {
+        "total": 1,
+        "page": 2,
+        "limit": 5,
+        "total_pages": 1,
+    }
+
+
+
+def test_get_posts_rejects_invalid_pagination_parameters(client):
+    response = client.get("/api/v1/posts?page=0&limit=200")
+
+    assert response.status_code == 422
+
 
 
 def test_create_post_persists_post(client, db_session):

@@ -12,8 +12,11 @@ class PostService:
     def create_post(self, post_data: PostCreate) -> PostRecord:
         return self.repository.create(post_data)
 
-    def list_posts(self) -> list[PostRecord]:
-        return self.repository.get_all()
+    def list_posts(
+        self, page: int = 1, limit: int = 10
+    ) -> tuple[list[PostRecord], int]:
+        return self.repository.get_paginated(page=page, limit=limit)
+
 
     def get_post(self, post_id: int) -> PostRecord | None:
         return self.repository.get_by_id(post_id)
