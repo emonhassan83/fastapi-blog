@@ -141,19 +141,30 @@ def create_module(name: str, force: bool = False) -> None:
         file_path.write_text(content, encoding="utf-8")
         print(f"  + Created {file_path.relative_to(PROJECT_ROOT)}")
 
-    print(f"\n[Success] Simple template for module '{module_name}' created in {target_dir.relative_to(PROJECT_ROOT)}!")
+    print(
+        f"\n[Success] Simple template for module '{module_name}' created in {target_dir.relative_to(PROJECT_ROOT)}!"
+    )
     print("\nNext Steps:")
     print("1. Register the router in 'src/app/api/v1.py':")
     print(f"   from app.modules.{module_name}.router import router as {module_name}_router")
-    print(f'   router.include_router({module_name}_router, prefix="/{plural_name}", tags=["{plural_name.capitalize()}"])')
+    print(
+        f'   router.include_router({module_name}_router, prefix="/{plural_name}", tags=["{plural_name.capitalize()}"])'
+    )
     print("\n2. Include the model in 'alembic/env.py':")
     print(f"   from app.modules.{module_name} import models as {module_name}_models  # noqa: F401")
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Scaffold a simple domain module template in FastAPI Blog.")
+    parser = argparse.ArgumentParser(
+        description="Scaffold a simple domain module template in FastAPI Blog."
+    )
     parser.add_argument("name", help="Name of the module (e.g. category, tag, comment)")
-    parser.add_argument("-f", "--force", action="store_true", help="Overwrite existing module files if directory exists")
+    parser.add_argument(
+        "-f",
+        "--force",
+        action="store_true",
+        help="Overwrite existing module files if directory exists",
+    )
     args = parser.parse_args()
     create_module(args.name, force=args.force)
 

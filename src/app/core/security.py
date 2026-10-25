@@ -19,9 +19,7 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
     return password_hash.verify(plain_password, hashed_password)
 
 
-def create_access_token(
-    user_id: int, email: str, expires_delta: timedelta | None = None
-) -> str:
+def create_access_token(user_id: int, email: str, expires_delta: timedelta | None = None) -> str:
     """Create a signed JWT access token containing user_id and email claims."""
     now = datetime.now(UTC)
     if expires_delta:
@@ -36,9 +34,7 @@ def create_access_token(
         "iat": now,
         "exp": expire,
     }
-    return jwt.encode(
-        payload, settings.jwt_secret_key, algorithm=settings.jwt_algorithm
-    )
+    return jwt.encode(payload, settings.jwt_secret_key, algorithm=settings.jwt_algorithm)
 
 
 def decode_access_token(token: str) -> dict[str, Any]:

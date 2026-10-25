@@ -8,5 +8,3 @@ router = APIRouter()
 router.include_router(auth_router, prefix="/auth", tags=["Auth"])
 router.include_router(post_router, prefix="/posts", tags=["Posts"])
 router.include_router(user_router, prefix="/users", tags=["Users"])
-
-

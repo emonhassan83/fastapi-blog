@@ -42,11 +42,9 @@ class PaginationMeta(BaseModel):
         )
 
 
-
 class PaginatedResponse[DataT](BaseModel):
     """Standard generic wrapper envelope for paginated endpoints."""
 
     message: str
     data: list[DataT]
     pagination: PaginationMeta
-

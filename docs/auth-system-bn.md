@@ -233,11 +233,12 @@ from app.modules.post.schemas import PostCreate, PostResponse
 
 router = APIRouter()
 
+
 @router.post("", status_code=status.HTTP_201_CREATED, response_model=PostResponse)
 def create_post(
     post_data: PostCreate,
     db: DatabaseSession,
-    current_user: CurrentUser,   # <--- শুধুমাত্র টোকেনধারী অথেনটিকেটেড ইউজার এক্সেস পাবে
+    current_user: CurrentUser,  # <--- শুধুমাত্র টোকেনধারী অথেনটিকেটেড ইউজার এক্সেস পাবে
 ) -> PostResponse:
     # current_user.id এবং current_user.email সরাসরি এখানে ব্যবহারযোগ্য
     print(f"Post created by user: {current_user.email} (ID: {current_user.id})")
