@@ -1,7 +1,7 @@
 from datetime import UTC, datetime
 
 from sqlalchemy import Boolean, DateTime, ForeignKey, Integer, String, Text, func
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.database import Base
 
@@ -32,3 +32,4 @@ class PostRecord(Base):
         ForeignKey("users.id"),
         nullable=False,
     )
+    author: Mapped["User"] = relationship("User", back_populates="posts")

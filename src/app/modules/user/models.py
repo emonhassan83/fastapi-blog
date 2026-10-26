@@ -1,7 +1,7 @@
 from datetime import UTC, datetime
 
 from sqlalchemy import DateTime, Integer, String, func
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.database import Base
 
@@ -26,6 +26,7 @@ class User(Base):
         server_default=func.now(),
         nullable=False,
     )
+    posts: Mapped[list["PostRecord"]] = relationship("PostRecord", back_populates="author")
 
 
 UserRecord = User
